@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import axios from 'axios';
 
 import Link from 'next/link';
 
@@ -13,15 +14,11 @@ import Switch from '@components/Form/Switch';
 import Button from '@components/Button/Button';
 import Loader from '@components/Loader/Loader';
 
-// utils
-import Request, { type IRequest, type IResponse } from '@utils/Request';
-
 // interfaces
 interface IFormProps {
   tos: boolean;
   name: string;
   email: string;
-  lastname: string;
   password: string;
 }
 
@@ -32,18 +29,11 @@ const Form: React.FC = () => {
   const [formValues, setFormValues] = useState<IFormProps>({
     name: '',
     email: '',
-    lastname: '',
     password: '',
     tos: false,
   });
 
-  /**
-   * Handles the change event for input fields in the form.
-   *
-   * This function is called when the value of an input field in the form changes. It updates the state of the form values with the new value.
-   *
-   * @param {React.ChangeEvent<HTMLInputElement>} e - The change event.
-   */
+  // Handle changes in the input fields
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
 
@@ -53,13 +43,7 @@ const Form: React.FC = () => {
     });
   };
 
-  /**
-   * Handles the change event for checkbox fields in the form.
-   *
-   * This function is called when the value of a checkbox field in the form changes. It updates the state of the form values with the new value.
-   *
-   * @param {React.ChangeEvent<HTMLInputElement>} e - The change event.
-   */
+  // Handle changes in checkbox fields
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, checked } = e.target;
 
@@ -69,41 +53,29 @@ const Form: React.FC = () => {
     });
   };
 
-  /**
-   * Handles the form submission event.
-   *
-   * This function is called when the form is submitted. It prevents the default form submission behavior,
-   * hides any existing alert, sets the loading state to true, sends a POST request to the signin/password endpoint,
-   * and handles the response. If the response status is 200, it redirects the user to the account activation page.
-   * If the status is not 200, it shows an error alert. Finally, it sets the loading state back to false.
-   *
-   * @param {React.FormEvent<HTMLFormElement>} e - The form submission event.
-   * @returns {Promise<any>} A promise that resolves when the request is complete.
-   */
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<any> => {
     e.preventDefault();
 
     hideAlert();
-
     setLoading(true);
 
-    const parameters: IRequest = {
-      url: 'v1/signin/password',
-      method: 'POST',
-      postData: {
+    try {
+      const response = await axios.post('http://localhost:5000/api/users/register', {
+        name: formValues.name,
         email: formValues.email,
         password: formValues.password,
-      },
-    };
+        role: 'user',  // Assuming a default role of 'user'
+      });
 
-    const req: IResponse = await Request.getResponse(parameters);
-
-    const { status, data } = req;
-
-    if (status === 200) {
-      window.location.href = '/members/activate/account';
-    } else {
-      showAlert({ type: 'error', text: data.title ?? '' });
+      // If registration is successful, show a success alert or redirect
+      if (response.status === 201) {  
+        showAlert({ type: 'success', text: 'User registered successfully!' });
+        window.location.href = '/members/signin';  // Redirect after successful registration
+      }
+    } catch (err: any) {  
+      // Show error message if registration fails
+      showAlert({ type: 'error', text: err.response?.data?.message || 'Registration failed' });
     }
 
     setLoading(false);
@@ -117,9 +89,7 @@ const Form: React.FC = () => {
     <form
       className='form shrink'
       noValidate
-      onSubmit={(e) => {
-        void handleSubmit(e);
-      }}
+      onSubmit={(e) => void handleSubmit(e)}
     >
       <div className='form-elements'>
         <div className='form-line'>
@@ -171,22 +141,6 @@ const Form: React.FC = () => {
               value={formValues.name}
               maxLength={64}
               placeholder='Enter your name'
-              required
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-        <div className='form-line'>
-          <div className='one-line'>
-            <div className='label-line'>
-              <label htmlFor='lastname'>Last name</label>
-            </div>
-            <Input
-              type='text'
-              name='lastname'
-              value={formValues.lastname}
-              maxLength={64}
-              placeholder='Enter your last name'
               required
               onChange={handleChange}
             />
