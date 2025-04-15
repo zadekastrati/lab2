@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter, usePathname } from 'next/navigation';
-import useAlert from '@hooks/useAlert';
+import { jwtDecode } from 'jwt-decode';
 
+
+import useAlert from '@hooks/useAlert';
 import Input from '@components/Form/Input';
 import Button from '@components/Button/Button';
 import Loader from '@components/Loader/Loader';
@@ -12,6 +14,14 @@ import Loader from '@components/Loader/Loader';
 interface ILoginFormProps {
   email: string;
   password: string;
+}
+
+interface DecodedToken {
+  userId: number;
+  email: string;
+  role: string;
+  iat: number;
+  exp: number;
 }
 
 const LoginForm: React.FC = () => {
@@ -39,7 +49,17 @@ const LoginForm: React.FC = () => {
       });
 
       if (response.status === 200) {
-        localStorage.setItem('authToken', response.data.token);
+        const token = response.data.token;
+        localStorage.setItem('authToken', token);
+
+        // Decode token to extract user info
+        const decoded = jwtDecode<DecodedToken>(token);
+
+        console.log('Decoded token:', decoded);
+
+        localStorage.setItem('userRole', decoded.role);
+        localStorage.setItem('userId', decoded.userId.toString());
+
         showAlert({ type: 'success', text: 'Login successful!' });
 
         setTimeout(() => {
@@ -57,7 +77,7 @@ const LoginForm: React.FC = () => {
   useEffect(() => {
     const token = localStorage.getItem('authToken');
     const path = window.location.pathname;
-  
+
     // Only redirect if we're not already on a public route like /signin or /signup
     if (token && (path === '/signin' || path === '/signup')) {
       router.push('/');
