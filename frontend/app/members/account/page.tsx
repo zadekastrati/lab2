@@ -1,67 +1,97 @@
-import { type Metadata } from 'next';
+'use client';
 
-// components
+import { useEffect, useState } from 'react';
 import Master from '@components/Layout/Master';
 import Section from '@components/Section/Section';
 import Heading from '@components/Heading/Heading';
 import ButtonGroup from '@components/Button/ButtonGroup';
 import ButtonGroupItem from '@components/Button/ButtonGroupItem';
-
 import FormMain from './components/FormMain';
-import FormPhoto from './components/FormPhoto';
+import Loader from '@components/Loader/Loader';
+import Request, { type IRequest, type IResponse } from '@utils/Request';
 
-const Page: React.FC = () => (
-  <Master>
-    <Section className='white-background'>
-      <div className='container'>
-        <div className='center'>
-          <Heading type={1} color='gray' text='My account' />
-          <p className='gray form-information'>
-            You can update your profile photo and your account details here.
-          </p>
-          <div className='button-container'>
-            <ButtonGroup color='gray'>
-              <ButtonGroupItem url='members/tickets' text='My tickets' />
-              <ButtonGroupItem url='members/account' text='My account' active />
-            </ButtonGroup>
+interface ExtendedRequest extends IRequest {
+  headers?: Record<string, string>;
+}
+
+const Page: React.FC = () => {
+  const [userData, setUserData] = useState<{ name: string; email: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return; // ⛔ Server-side, skip
+  
+    const fetchUserData = async () => {
+      const userToken = localStorage.getItem('authToken');
+      console.log('Token from localStorage:', localStorage.getItem('authToken'));
+      if (!userToken) {
+        console.error('User token is not available');
+        return;
+      }
+  
+      const parameters: ExtendedRequest = {
+        url: 'users/me',
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      };
+  
+      const res: IResponse = await Request.getResponse(parameters);
+      console.log('Response from /v1/users/me:', res);
+      if (res.status === 200 && res.data && res.data.results) {
+        const { name, email } = res.data.results;
+        setUserData({ name: name || '', email: email || '' });
+      } else {
+        console.error('Failed to load user data', res);
+      }
+  
+      setLoading(false);
+    };
+  
+    fetchUserData();
+  }, []);
+  
+
+  if (loading) {
+    return <Loader type="page" color="gray" text="Loading user data..." />;
+  }
+
+  if (!userData) {
+    return (
+      <Master>
+        <Section>
+          <div className="container center">
+            <p className="red">Failed to load user info</p>
           </div>
-          <div className='padding-top'>
-            <FormPhoto data='/profile.jpg' />
+        </Section>
+      </Master>
+    );
+  }
+
+  return (
+    <Master>
+      <Section className="white-background">
+        <div className="container">
+          <div className="center">
+            <Heading type={1} color="gray" text="My account" />
+            <p className="gray form-information">
+              You can update your profile details here.
+            </p>
+            <div className="button-container">
+              <ButtonGroup color="gray">
+                <ButtonGroupItem url="members/tickets" text="My tickets" />
+                <ButtonGroupItem url="members/account" text="My account" active />
+              </ButtonGroup>
+            </div>
+            <div className="padding-top">
+              <FormMain data={{ name: userData.name, email: userData.email }} />
+            </div>
           </div>
         </div>
-      </div>
-    </Section>
-    <Section className='white-background'>
-      <div className='container'>
-        <FormMain
-          data={{
-            name: 'Name',
-            lastname: 'Surname',
-            email: 'someone@example.com',
-          }}
-        />
-      </div>
-    </Section>
-  </Master>
-);
-
-const title = 'My account';
-const canonical = 'https://modern-ticketing.com/members/account';
-const description = 'Modern ticketing is a modern ticketing solution';
-
-export const metadata: Metadata = {
-  title,
-  description,
-  keywords: 'modern ticketing',
-  alternates: { canonical },
-  openGraph: {
-    title,
-    description,
-    url: canonical,
-    type: 'website',
-    siteName: 'Modern Ticketing',
-    images: 'https://modern-ticketing.com/logo192.png',
-  },
+      </Section>
+    </Master>
+  );
 };
 
 export default Page;

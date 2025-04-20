@@ -13,7 +13,12 @@ app.get("/", (req, res) => {
     res.send("API is running...");
 });
 
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:3000', // adjust this to your frontend URL
+    credentials: true
+  }));
+  ;
+  
 app.use('/api/users',userRoutes);
 app.use('/api/events', eventRoutes);
 

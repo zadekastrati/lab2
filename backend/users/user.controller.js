@@ -54,8 +54,85 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
 };
+//getUserById
+const getUserById = async (req, res) => {
+    try {
+      const userId = req.params.id;
+  
+      // Find user by ID
+      const user = await User.findByPk(userId);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+  
+      res.status(200).json({ user });
+    } catch (err) {
+      res.status(500).json({ message: 'Server error', error: err.message });
+    }
+  };
+  
+  //updateUser
+  const updateUser = async (req, res) => {
+    try {
+      // Log the incoming request data
+      console.log('Update request received for user:', req.params.id);
+      console.log('Request body:', req.body);
+  
+      const { name, email, password, role } = req.body;
+      const userId = req.params.id;
+  
+      // Log userId to verify the correct user is being targeted
+      console.log('User ID:', userId);
+  
+      // Find user by ID
+      const user = await User.findByPk(userId);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+  
+      // Log the found user for debugging
+      console.log('Found user:', user);
+  
+      // Update user details
+      if (name) user.name = name;
+      if (email) user.email = email;
+      if (role) user.role = role;
+      if (password) {
+        // Hash password if provided
+        user.password = await bcrypt.hash(password, 10);
+      }
+  
+      // Save updated user
+      await user.save();
+  
+      // Log the updated user data
+      console.log('Updated user:', user);
+  
+      res.status(200).json({ message: 'User updated successfully', user });
+    } catch (err) {
+      console.log('Error occurred:', err);  // Log error details for debugging
+      res.status(500).json({ message: 'Server error', error: err.message });
+    }
+  };
+  
+  //deleteUser
+  const deleteUser = async (req, res) => {
+    try {
+      const userId = req.params.id;
+  
+      // Find user by ID
+      const user = await User.findByPk(userId);
+      if (!user) return res.status(404).json({ message: 'User not found' });
+  
+      // Delete user    
+      await user.destroy();
+  
+      res.status(200).json({ message: 'User deleted successfully' });
+    } catch (err) {
+      res.status(500).json({ message: 'Server error', error: err.message });
+    }
+  };
 
 module.exports = {
   registerUser,
-  loginUser
+  loginUser,
+  getUserById,
+  updateUser,
+  deleteUser
 };
