@@ -6,6 +6,7 @@
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
@@ -27,6 +28,7 @@
     "target": "ES2017"
   },
   "include": [
+    "types",
     "src",
     "**/*.ts",
     "**/*.tsx",
@@ -35,6 +37,6 @@
     "eslint.config.mjs",
     ".next/types/**/*.ts",
     "build/types/**/*.ts"
-  ],
+, "app/members/signout/metadata.js"  ],
   "exclude": ["node_modules"]
 }

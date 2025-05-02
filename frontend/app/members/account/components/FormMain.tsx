@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link'; // Corrected import
+import Link from 'next/link';
 import useAlert from '@hooks/useAlert';
 import Input from '@components/Form/Input';
 import Button from '@components/Button/Button';
@@ -71,10 +71,15 @@ const FormMain: React.FC<IProps> = ({ data }) => {
   return (
     <form className='form shrink' noValidate onSubmit={handleSubmit}>
       <div className='form-elements'>
+        {/* Change name */}
         <div className='form-line'>
           <div className='one-line'>
-            <div className='label-line'>
+            <div className='label-line flex flex-v-center flex-space-between'>
               <label htmlFor='name'>Name</label>
+              {/* Add a link to change the name */}
+              <Link href='/members/account/components/name' className='blue'>
+                    Change name
+              </Link>
             </div>
             <Input
               type='text'
@@ -88,6 +93,7 @@ const FormMain: React.FC<IProps> = ({ data }) => {
           </div>
         </div>
 
+        {/* Change email */}
         <div className='form-line'>
           <div className='one-line'>
             <div className='label-line flex flex-v-center flex-space-between'>

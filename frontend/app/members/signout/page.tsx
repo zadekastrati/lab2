@@ -1,20 +1,26 @@
-// app/members/signout/page.tsx
-'use client'; // Add this to mark this as a client-side component
+'use client';
 
-import { useEffect } from 'react';
-import { metadata } from './metadata'; // Import the metadata here
+import { useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Master from '@components/Layout/Master';
 import Section from '@components/Section/Section';
 import Heading from '@components/Heading/Heading';
 import ButtonLink from '@components/Button/ButtonLink';
 
 const Page: React.FC = () => {
+  const [message, setMessage] = useState('You are successfully signed out and can safely return to the home page.');
+  const searchParams = useSearchParams();
+
   useEffect(() => {
-    // Clear auth-related data
     localStorage.removeItem('authToken');
     localStorage.removeItem('userRole');
     localStorage.removeItem('userId');
-  }, []);
+
+    const reason = searchParams.get('reason');
+    if (reason === 'expired') {
+      setMessage('Your session expired. Please sign in again.');
+    }
+  }, [searchParams]);
 
   return (
     <Master>
@@ -22,13 +28,10 @@ const Page: React.FC = () => {
         <div className='container'>
           <div className='center'>
             <Heading type={1} color='gray' text='Signed out' />
-            <p className='gray form-information'>
-              You are successfully signed out and you can safely return to the home page.
-            </p>
-
+            <p className='gray form-information'>{message}</p>
             <div className='button-container'>
               <ButtonLink color='gray-overlay' text='Return to home' url='/' />
-              &nbsp; &nbsp;
+              &nbsp;&nbsp;
               <ButtonLink color='blue-filled' text='Sign in again' url='/members/signin' />
             </div>
           </div>

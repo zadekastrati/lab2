@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useRouter, usePathname } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode';
-
 
 import useAlert from '@hooks/useAlert';
 import Input from '@components/Form/Input';
@@ -14,14 +12,6 @@ import Loader from '@components/Loader/Loader';
 interface ILoginFormProps {
   email: string;
   password: string;
-}
-
-interface DecodedToken {
-  userId: number;
-  email: string;
-  role: string;
-  iat: number;
-  exp: number;
 }
 
 const LoginForm: React.FC = () => {
@@ -41,37 +31,52 @@ const LoginForm: React.FC = () => {
     e.preventDefault();
     hideAlert();
     setLoading(true);
-
+  
     try {
       const response = await axios.post('http://localhost:5000/api/users/login', {
         email: formValues.email,
         password: formValues.password,
       });
-
+  
+      console.log('Response:', response.data); // Log the full response
+  
       if (response.status === 200) {
         const token = response.data.token;
         localStorage.setItem('authToken', token);
-
-        // Decode token to extract user info
-        const decoded = jwtDecode<DecodedToken>(token);
-
+  
+        // Manually decode the token
+        const decoded = decodeJwt(token);
+  
         console.log('Decoded token:', decoded);
-
+  
         localStorage.setItem('userRole', decoded.role);
         localStorage.setItem('userId', decoded.userId.toString());
-
+  
         showAlert({ type: 'success', text: 'Login successful!' });
-
+  
         setTimeout(() => {
-          router.push('/');
-        }, 1000); // slight delay to show alert
+          router.push('/'); // Redirect to the homepage after 1 second
+        }, 1000);
       }
     } catch (err: any) {
+      console.error('Login error:', err); // Log the error response
       showAlert({ type: 'error', text: err.response?.data?.message || 'Login failed' });
     } finally {
       setLoading(false);
     }
   };
+  
+  // Function to decode JWT token
+  const decodeJwt = (token: string) => {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // Make the base64 URL safe
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+  
+    return JSON.parse(jsonPayload);
+  };
+  
 
   // Redirect only if already logged in and not on /signin
   useEffect(() => {

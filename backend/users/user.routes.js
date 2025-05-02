@@ -2,6 +2,8 @@
     const router = express.Router();
     const { registerUser, loginUser,getUserById,updateUser,deleteUser } = require('./user.controller');
     const verifyToken = require('./middleware/jwtMiddleware'); 
+    const allowRoles = require('./middleware/roleMiddleware'); // Adjust path as needed
+
 
     // @route   POST /api/users/register
     router.post('/register', registerUser);
@@ -35,11 +37,10 @@
 
     router.get('/:id',verifyToken, getUserById);
 
-    router.put('/:id', verifyToken, (req, res) => {
+    router.put('/:id', verifyToken, allowRoles('admin'), (req, res) => {
         console.log('Authorization Header:', req.headers['authorization']);
         updateUser(req, res);
-    });
+      });
 
-    router.delete('/:id',verifyToken, deleteUser);
-
+      router.delete('/:id', verifyToken, allowRoles('admin'), deleteUser);
     module.exports = router;

@@ -13,21 +13,19 @@ import Loader from '@components/Loader/Loader';
 import ButtonLink from '@components/Button/ButtonLink';
 
 interface IFormProps {
-  email: string;
-  emailAgain: string;
+  name: string;
 }
 
 interface ITokenPayload {
   userId: string;
 }
 
-const Form: React.FC = () => {
+const NameForm: React.FC = () => {
   const { showAlert, hideAlert } = useAlert();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [formValues, setFormValues] = useState<IFormProps>({
-    email: '',
-    emailAgain: '',
+    name: '',
   });
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -35,7 +33,7 @@ const Form: React.FC = () => {
     const token = localStorage.getItem('authToken');
     if (token) {
       try {
-        const decoded: ITokenPayload = decodeJwt(token); // Use the custom decodeJwt function
+        const decoded: ITokenPayload = decodeJwt(token);
         setUserId(decoded.userId);
         localStorage.setItem('userId', decoded.userId);
       } catch (error) {
@@ -57,8 +55,9 @@ const Form: React.FC = () => {
     e.preventDefault();
     hideAlert();
 
-    if (formValues.email !== formValues.emailAgain) {
-      showAlert({ type: 'error', text: "Emails don't match" });
+    // Validate name field
+    if (!formValues.name.trim()) {
+      showAlert({ type: 'error', text: 'Name cannot be empty' });
       return;
     }
 
@@ -73,9 +72,12 @@ const Form: React.FC = () => {
     setLoading(true);
 
     try {
+      // Log the userId and token for debugging
+      console.log("Making API request with userId:", finalUserId, "and token:", token);
+
       const response = await axios.put(
         `http://localhost:5000/api/users/${finalUserId}`,
-        { email: formValues.email },
+        { name: formValues.name },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -84,9 +86,10 @@ const Form: React.FC = () => {
       );
 
       if (response.status === 200) {
-        showAlert({ type: 'success', text: 'Email updated successfully.' });
+        showAlert({ type: 'success', text: 'Name updated successfully.' });
+        console.log('Name update successful'); // Success log
       } else {
-        showAlert({ type: 'error', text: 'Email update failed. Please try again.' });
+        showAlert({ type: 'error', text: 'Name update failed. Please try again.' });
       }
     } catch (error: any) {
       console.error('Request failed:', error);
@@ -98,64 +101,50 @@ const Form: React.FC = () => {
     setLoading(false);
   };
 
-  // Function to decode JWT token
+  // Helper function to decode JWT token
   const decodeJwt = (token: string) => {
     const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/'); // Make the base64 URL safe
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
-  
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
     return JSON.parse(jsonPayload);
   };
 
   if (loading) {
-    return <Loader type='inline' color='gray' text='Hang on a second' />;
+    return <Loader type="inline" color="gray" text="Hang on a second" />;
   }
 
   return (
-    <form className='form shrink' noValidate onSubmit={handleSubmit}>
-      <div className='form-elements'>
-        <div className='form-line'>
-          <div className='one-line'>
-            <div className='label-line'>
-              <label htmlFor='email'>E-mail address</label>
+    <form className="form shrink" noValidate onSubmit={handleSubmit}>
+      <div className="form-elements">
+        <div className="form-line">
+          <div className="one-line">
+            <div className="label-line">
+              <label htmlFor="name">Your Name</label>
             </div>
             <Input
-              type='email'
-              name='email'
-              value={formValues.email}
+              type="text"
+              name="name"
+              value={formValues.name}
               maxLength={128}
-              placeholder='Enter your new e-mail address'
+              placeholder="Enter your full name"
               required
               onChange={handleChange}
             />
           </div>
         </div>
-        <div className='form-line'>
-          <div className='one-line'>
-            <div className='label-line'>
-              <label htmlFor='emailAgain'>Confirm e-mail address</label>
-            </div>
-            <Input
-              type='email'
-              name='emailAgain'
-              value={formValues.emailAgain}
-              maxLength={128}
-              placeholder='Re-enter your new e-mail address'
-              required
-              onChange={handleChange}
-            />
-          </div>
-        </div>
-        <div className='form-buttons'>
-          <ButtonLink color='gray-overlay' text='Go back' url='members/account' />
+        <div className="form-buttons">
+          <ButtonLink color="gray-overlay" text="Go back" url="members/account" />
           &nbsp; &nbsp;
-          <Button type='submit' color='blue-filled' text='Submit' />
+          <Button type="submit" color="blue-filled" text="Submit" />
         </div>
       </div>
     </form>
   );
 };
 
-export default Form;
+export default NameForm;
