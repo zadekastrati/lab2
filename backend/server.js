@@ -4,6 +4,7 @@ require('dotenv').config();
 require('./config/db.js');
 const cors = require('cors');
 const userRoutes = require('./users/user.routes.js');
+const eventRoutes = require('./events/event.routes');
 const PORT = process.env.PORT || 5000;
 
 // ✅ CORS setup
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 });
 
 app.use('/api/users', userRoutes);
+app.use('/api/events', eventRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
