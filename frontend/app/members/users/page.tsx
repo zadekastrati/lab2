@@ -52,10 +52,10 @@ const Page: React.FC = () => {
   const handleDelete = async (userId: number) => {
     const confirmDelete = window.confirm('Are you sure you want to delete this user?');
     if (!confirmDelete) return;
-  
+
     const token = localStorage.getItem('authToken');
     console.log('Deleting user with token:', token); // Debugging line
-  
+
     const requestParams: IRequest = {
       url: `http://localhost:5000/api/users/${userId}`,
       method: 'DELETE',
@@ -63,27 +63,24 @@ const Page: React.FC = () => {
         Authorization: `Bearer ${token}`,
       },
     };
-  
+
     try {
       const res: IResponse = await Request.getResponse(requestParams);
       console.log('Response status:', res.status); // Debugging line
-      // Check if status is 200 (successful deletion)
       if (res.status === 200) {
         console.log('User deleted successfully');
         setUsers((prevUsers) => prevUsers.filter((user) => user.id !== userId));
       } else {
-        // Safely check if message exists before accessing it
-const errorMessage = (res.data as { message?: string })?.message || 'Failed to delete user';
+        const errorMessage = (res.data as { message?: string })?.message || 'Failed to delete user';
         throw new Error(errorMessage);
       }
     } catch (err: any) {
-      // Display a more detailed error message in the alert
       alert(`Failed to delete user: ${err.message || 'Unknown error'}`);
     }
   };
-  
-  
 
+  const userRole = localStorage.getItem('userRole'); // Store user role after login
+  
   if (loading) {
     return <Loader type="page" color="gray" text="Loading users..." />;
   }
@@ -108,33 +105,35 @@ const errorMessage = (res.data as { message?: string })?.message || 'Failed to d
             <Heading type={1} color="gray" text="Registered Users" />
             <p className="gray form-information">List of all registered users:</p>
             
-            {/* Table structure with borders and rounded corners */}
-            <table className="min-w-full mt-4 border-separate border-spacing-0 border border-gray-300 rounded-lg">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300 rounded-tl-lg">Name</th>
-                  <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300">Email</th>
-                  <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300 rounded-tr-lg">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50">
-                    <td className="py-2 px-4 border-b border-gray-300">{user.name}</td>
-                    <td className="py-2 px-4 border-b border-gray-300">{user.email}</td>
-                    <td className="py-2 px-4 text-center border-b border-gray-300">
-                      <button
-                        className="text-red-500 hover:text-red-700 transition"
-                        onClick={() => handleDelete(user.id)}
-                        title="Delete user"
-                      >
-                        <FaTrash style={{color:'red'}} />
-                      </button>
-                    </td>
+            {/* Render the table only for admin */}
+            {userRole === 'admin' && (
+              <table className="min-w-full mt-4 border-separate border-spacing-0 border border-gray-300 rounded-lg">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300 rounded-tl-lg">Name</th>
+                    <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300">Email</th>
+                    <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300 rounded-tr-lg">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
+                    <tr key={user.id} className="hover:bg-gray-50">
+                      <td className="py-2 px-4 border-b border-gray-300">{user.name}</td>
+                      <td className="py-2 px-4 border-b border-gray-300">{user.email}</td>
+                      <td className="py-2 px-4 text-center border-b border-gray-300">
+                        <button
+                          className="text-red-500 hover:text-red-700 transition"
+                          onClick={() => handleDelete(user.id)}
+                          title="Delete user"
+                        >
+                          <FaTrash style={{color:'red'}} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       </Section>
