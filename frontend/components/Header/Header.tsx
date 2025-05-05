@@ -88,8 +88,10 @@ const Header: React.FC = () => {
             <Dropdown color='gray'>
               <DropdownItem url='members/tickets' text='My tickets' />
               <DropdownItem url='members/account' text='My account' />
+              <DropdownItem url='members/users' text='Users'/>
               <hr />
               <DropdownItem url='members/signout' text='Sign out' />
+
             </Dropdown>
           )}
         </div>

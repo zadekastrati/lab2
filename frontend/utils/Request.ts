@@ -61,13 +61,28 @@ const getResponse = async (parameters: IRequest): Promise<IResponse> => {
 
   const timeout = parameters.timeout || 15000;
 
+  const axiosConfig = {
+    headers,
+    timeout,
+    withCredentials: true,
+  };
+
   try {
-    if (parameters.method === 'GET') {
-      response = await axios.get(url, { headers, timeout });
-    } else if (parameters.method === 'POST') {
-      response = await axios.post(url, parameters.postData, { headers, timeout });
-    } else {
-      throw new Error('Invalid HTTP method. Please use GET or POST.');
+    switch (parameters.method) {
+      case 'GET':
+        response = await axios.get(url, axiosConfig);
+        break;
+      case 'POST':
+        response = await axios.post(url, parameters.postData, axiosConfig);
+        break;
+      case 'PUT':
+        response = await axios.put(url, parameters.postData, axiosConfig);
+        break;
+      case 'DELETE':
+        response = await axios.delete(url, axiosConfig);
+        break;
+      default:
+        throw new Error('Invalid HTTP method. Please use GET, POST, PUT, or DELETE.');
     }
 
     return {
