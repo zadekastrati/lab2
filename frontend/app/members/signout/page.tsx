@@ -16,6 +16,9 @@ const Page: React.FC = () => {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userId');
 
+    window.dispatchEvent(new Event('authChanged'));
+
+
     const reason = searchParams.get('reason');
     if (reason === 'expired') {
       setMessage('Your session expired. Please sign in again.');

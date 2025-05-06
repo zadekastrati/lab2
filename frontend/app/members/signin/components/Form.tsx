@@ -51,6 +51,11 @@ const LoginForm: React.FC = () => {
   
         localStorage.setItem('userRole', decoded.role);
         localStorage.setItem('userId', decoded.userId.toString());
+        localStorage.setItem('userName', decoded.name);
+
+        window.dispatchEvent(new Event('authChanged'));
+
+
   
         showAlert({ type: 'success', text: 'Login successful!' });
   
