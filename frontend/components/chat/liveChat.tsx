@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 
+// Socket connection
 const socket = io('http://localhost:5000', {
   withCredentials: true,
 });
@@ -15,6 +16,7 @@ const Chat = () => {
   const [userName, setUserName] = useState('');
   const [isOpen, setIsOpen] = useState(false);
 
+  // Updates authentication state based on localStorage
   const updateAuthState = () => {
     const token = localStorage.getItem('authToken');
     const isLoggedIn = !!token;
@@ -30,6 +32,7 @@ const Chat = () => {
     }
   };
 
+  // Watch for auth changes (tab switch or logout)
   useEffect(() => {
     updateAuthState();
     const handleStorageChange = (e: StorageEvent) => {
@@ -43,30 +46,54 @@ const Chat = () => {
     };
   }, []);
 
+  // Load chat history on authentication
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    socket.on('chatMessage', (msg: { sender: string; content: string }) => {
-      setMessages((prev) => [...prev, msg]);
-    });
+    fetch('http://localhost:5000/api/livechat/messages', {
+      credentials: 'include',
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const loadedMessages = data.map((msg: any) => ({
+          sender: msg.sender,
+          content: msg.message,
+        }));
+        setMessages(loadedMessages);
+      })
+      .catch((err) => console.error('Failed to load chat history', err));
+  }, [isAuthenticated]);
+
+  // Listen for new incoming messages
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const handleIncomingMessage = (msg: { sender: string; content: string }) => {
+      setMessages((prevMessages) => [...prevMessages, msg]);
+    };
+
+    socket.on('newMessage', handleIncomingMessage);
 
     return () => {
-      socket.off('chatMessage');
+      socket.off('newMessage', handleIncomingMessage);
     };
   }, [isAuthenticated]);
 
-  if (!isAuthenticated) return null;
-
+  // Handle sending message
   const sendMessage = () => {
     if (message.trim()) {
       const senderLabel = userRole === 'Admin' ? 'Admin' : userName;
-      socket.emit('chatMessage', {
+      const newMessage = {
         sender: senderLabel,
         content: message,
-      });
+      };
+      socket.emit('chatMessage', newMessage);
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
       setMessage('');
     }
   };
+
+  if (!isAuthenticated) return null;
 
   return (
     <>
