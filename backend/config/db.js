@@ -6,7 +6,7 @@ const sequelize = new Sequelize({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST || '127.0.0.1',
-    dialect: 'postgres',
+    dialect: process.env.DB_DIALECT || 'postgres',
 });
 
 const authenticateDatabase = async () => {
@@ -17,6 +17,7 @@ const authenticateDatabase = async () => {
         console.error('Unable to connect to the database:', error);
     }
 };
+
 
 authenticateDatabase();
 

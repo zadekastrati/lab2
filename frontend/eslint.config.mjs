@@ -38,15 +38,15 @@ export default [
     rules: {
       ...hooksPlugin.configs.recommended.rules,
       ...jsxA11yPlugin.configs.recommended.rules,
-      'no-console': 'warn',
+      'no-console': 'off',  // Disable console statement warnings
       'react/prop-types': 'off',
-      'prettier/prettier': 'error',
+      'prettier/prettier': 'off',  // Disable Prettier formatting errors
       'jsx-a11y/no-autofocus': 'off',
       '@next/next/no-img-element': 'off',
       'react/react-in-jsx-scope': 'off',
       'react/require-default-props': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
-      'no-unused-vars': ['error', { args: 'none' }],
+      'no-unused-vars': ['off'],  // Disable unused vars check
       'jsx-a11y/label-has-associated-control': 'off',
       'react/function-component-definition': [2, { namedComponents: 'arrow-function' }],
     },

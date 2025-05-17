@@ -22,7 +22,8 @@
       "@utils/*": ["./utils/*"],
       "@contexts/*": ["./contexts/*"],
       "@providers/*": ["./providers/*"],
-      "@components/*": ["./components/*"]
+      "@components/*": ["./components/*"],
+      "@services/*": ["./services/*"]   
     },
     "target": "ES2017"
   },
