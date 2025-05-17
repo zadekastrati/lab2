@@ -5,12 +5,20 @@ import { type Metadata, type Viewport } from 'next';
 import './styles/ui.css';
 import './styles/site.css';
 
+// components
+import Chat from '../components/chat/liveChat'; // adjust the path if needed
+import AuthSync from '../components/AuthSync'; 
+
 // variables
 export const runtime = 'edge';
 
 const RootLayout: React.FC<Readonly<{ children: React.ReactNode }>> = ({ children }) => (
-  <html lang='en'>
-    <body>{children}</body>
+  <html lang="en">
+    <body>
+    <AuthSync /> 
+      {children}
+      <Chat /> {/* 👈 Live chat appears on all pages */}
+    </body>
   </html>
 );
 

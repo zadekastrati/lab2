@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 import Link from 'next/link';
 
@@ -17,6 +17,8 @@ const Header: React.FC = () => {
 
   const [menu, setMenu] = useState<boolean>(false);
   const [dropdown, setDropdown] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+
 
   /**
    * This is a functional component for the Header.
@@ -26,6 +28,14 @@ const Header: React.FC = () => {
   useClickOutside(wrapperRef, () => {
     setDropdown(false);
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem('authToken');
+    const decodedToken = token ? JSON.parse(atob(token.split('.')[1])) : null;
+    if (decodedToken?.role === 'admin') {
+      setIsAdmin(true);
+    }
+  }, []);
 
   /**
    * Toggles the menu state.
@@ -88,8 +98,10 @@ const Header: React.FC = () => {
             <Dropdown color='gray'>
               <DropdownItem url='members/tickets' text='My tickets' />
               <DropdownItem url='members/account' text='My account' />
+              {isAdmin && <DropdownItem url='members/users' text='Users' />}
               <hr />
               <DropdownItem url='members/signout' text='Sign out' />
+
             </Dropdown>
           )}
         </div>

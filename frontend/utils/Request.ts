@@ -13,12 +13,13 @@ export interface IResponse {
 }
 
 export interface IRequest {
-  url: string;
-  method: string;
+  url: string; // must be full URL now
+  method: "GET" | "POST" | "PUT" | "DELETE";
   postData?: any;
+  headers?: Record<string, string>;
+  timeout?: number;
 }
 
-// variables
 const auth = {
   username: 'username',
   password: 'password',
@@ -26,87 +27,89 @@ const auth = {
 
 const createAuth = base64.encode(`${auth.username}:${auth.password}`);
 
-/**
- * Generates the base URL for API requests.
- *
- * @return {string} The base URL for API requests.
- */
-const buildUrl = (): string => {
-  return 'https://website-api.com';
-};
-
-/**
- * Parses a JSON string into a JavaScript object.
- *
- * @param {string} value - The JSON string to be parsed.
- * @return {any} The parsed JavaScript object.
- */
 const parseResults = (value: string): any => {
-  const parse = JSON.parse(value);
-
-  return parse;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return { title: 'Failed to parse error response' };
+  }
 };
 
-/**
- * This function makes a request to the API and returns the response.
- *
- * @param {IRequest} parameters - The parameters for the request.
- * @return {Promise<IResponse>} The response from the API.
- */
+// Axios interceptor to handle expired token
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      // Token is invalid/expired
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('userId');
+      window.location.href = '/members/signout?reason=expired';
+    }
+    return Promise.reject(error);
+  }
+);
+
 const getResponse = async (parameters: IRequest): Promise<IResponse> => {
   let response: AxiosResponse<any, any>;
 
-  const url = `${buildUrl()}/${parameters.url}`;
+  const url = parameters.url;
 
-  const headers = { Authorization: `Basic ${createAuth}` };
+  const headers = parameters.headers || {
+    Authorization: `Basic ${createAuth}`,
+  };
+
+  const timeout = parameters.timeout || 15000;
+
+  const axiosConfig = {
+    headers,
+    timeout,
+    withCredentials: true,
+  };
 
   try {
-    if (parameters.method === 'GET') {
-      response = await axios.get(url, { headers, timeout: 15000 });
-    } else if (parameters.method === 'POST') {
-      response = await axios.post(url, parameters.postData, { headers, timeout: 15000 });
-    } else {
-      throw new Error('Invalid HTTP method. Please use GET or POST.');
+    switch (parameters.method) {
+      case 'GET':
+        response = await axios.get(url, axiosConfig);
+        break;
+      case 'POST':
+        response = await axios.post(url, parameters.postData, axiosConfig);
+        break;
+      case 'PUT':
+        response = await axios.put(url, parameters.postData, axiosConfig);
+        break;
+      case 'DELETE':
+        response = await axios.delete(url, axiosConfig);
+        break;
+      default:
+        throw new Error('Invalid HTTP method. Please use GET, POST, PUT, or DELETE.');
     }
 
-    const d: IResponse = {
+    return {
       data: response.data,
       status: response.status,
     };
-
-    return d;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      const err = error as AxiosError;
+      const axiosErr = error as AxiosError;
+      const responseText = axiosErr.request?.responseText;
 
-      const responseText: string = err.request?.responseText;
+      const parsedResults = responseText
+        ? parseResults(responseText)
+        : { title: axiosErr.message };
 
-      let parsedResults;
-
-      if (responseText !== '') {
-        parsedResults = parseResults(responseText);
-      } else {
-        parsedResults = { title: err.message };
-      }
-
-      const d: IResponse = {
+      return {
         data: parsedResults,
-        status: err.response?.status,
+        status: axiosErr.response?.status,
       };
-
-      return d;
     }
 
-    const err = error as Error;
-
-    const d: IResponse = {
+    return {
       data: {
-        title: err.message,
+        title: (error as Error).message,
       },
       status: 0,
     };
-
-    return d;
   }
 };
 
