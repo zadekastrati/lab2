@@ -3,16 +3,20 @@ const Event = require('./event.model');
 // Create Event
 const createEvent = async (req, res) => {
   try {
-    const { name, photo, date, location, price } = req.body;
+    const { name, photo, date, location, price, categoryId } = req.body;
 
-    const newEvent = await Event.create({ name, photo, date, location, price });
+    if (!categoryId) {
+      return res.status(400).json({ message: 'categoryId is required' });
+    }
+
+    const newEvent = await Event.create({ name, photo, date, location, price, categoryId });
     res.status(201).json({ message: 'Event created successfully', event: newEvent });
   } catch (error) {
     res.status(500).json({ message: 'Error creating event', error: error.message });
   }
 };
 
-// Get All Events
+// Get All Events (include categoryId)
 const getAllEvents = async (req, res) => {
   try {
     const events = await Event.findAll();
@@ -22,7 +26,7 @@ const getAllEvents = async (req, res) => {
   }
 };
 
-// Get Event by ID
+// Get Event by ID (include categoryId)
 const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -38,11 +42,11 @@ const getEventById = async (req, res) => {
   }
 };
 
-// Update Event
+// Update Event (including categoryId)
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, photo, date, location, price } = req.body;
+    const { name, photo, date, location, price, categoryId } = req.body;
 
     const event = await Event.findByPk(id);
     if (!event) {
@@ -54,6 +58,7 @@ const updateEvent = async (req, res) => {
     event.date = date || event.date;
     event.location = location || event.location;
     event.price = price || event.price;
+    event.categoryId = categoryId || event.categoryId;
 
     await event.save();
 
