@@ -3,20 +3,29 @@ const Event = require('./event.model');
 // Create Event
 const createEvent = async (req, res) => {
   try {
-    const { name, photo, date, location, price, categoryId } = req.body;
+    const { name, date, location, price, categoryId } = req.body;
+    const photo = req.file ? req.file.filename : null;
 
-    if (!categoryId) {
-      return res.status(400).json({ message: 'categoryId is required' });
+    if (!name || !date || !location || !price || !categoryId || !photo) {
+      return res.status(400).json({ message: 'All fields including photo are required.' });
     }
 
-    const newEvent = await Event.create({ name, photo, date, location, price, categoryId });
+    const newEvent = await Event.create({
+      name,
+      photo,
+      date,
+      location,
+      price,
+      categoryId,
+    });
+
     res.status(201).json({ message: 'Event created successfully', event: newEvent });
   } catch (error) {
+    console.error('Error creating event:', error);
     res.status(500).json({ message: 'Error creating event', error: error.message });
   }
 };
 
-// Get All Events (include categoryId)
 const getAllEvents = async (req, res) => {
   try {
     const events = await Event.findAll();
