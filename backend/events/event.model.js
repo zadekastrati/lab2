@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const Category = require('../categories/category.model'); // Import category model
+const Categories = require('../categories/category.model');  // Import Categories model to set association
 
 const Event = sequelize.define('Event', {
   id: {
@@ -32,17 +32,18 @@ const Event = sequelize.define('Event', {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: 'categories', // lowercase table name
+      model: Categories,
       key: 'id',
     },
   },
 }, {
   tableName: 'events',
-  timestamps: true,
+  timestamps: true, // Recommended to keep timestamps true to match migration with createdAt & updatedAt
 });
 
-// Associations
-Category.hasMany(Event, { foreignKey: 'categoryId' });
-Event.belongsTo(Category, { foreignKey: 'categoryId' });
+// Set up association (1 category has many events, 1 event belongs to a category)
+Categories.hasMany(Event, { foreignKey: 'categoryId' });
+Event.belongsTo(Categories, { foreignKey: 'categoryId' });
 
 module.exports = Event;
+  

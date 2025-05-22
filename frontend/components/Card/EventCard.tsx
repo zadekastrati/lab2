@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import React from 'react';
 
 // components
 import Badge from '@components/Badge/Badge';
@@ -13,9 +14,19 @@ interface IProps {
   venue: string;
   image: string;
   color: string;
+  actions?: React.ReactNode;  // <-- new optional prop
 }
 
-const EventCard: React.FC<IProps> = ({ url, from, when, name, venue, image, color }) => (
+const EventCard: React.FC<IProps> = ({
+  url,
+  from,
+  when,
+  name,
+  venue,
+  image,
+  color,
+  actions,  // destructure actions
+}) => (
   <div className='card'>
     <Link href={`/event/${url}`}>
       <div className='card-title'>
@@ -43,12 +54,16 @@ const EventCard: React.FC<IProps> = ({ url, from, when, name, venue, image, colo
       </div>
     </Link>
     <div className='card-buttons'>
-      <ButtonLink
-        color={`${color}-overlay`}
-        text='Details'
-        rightIcon='arrow_forward'
-        url={`event/${url}`}
-      />
+      {actions ? (
+        actions
+      ) : (
+        <ButtonLink
+          color={`${color}-overlay`}
+          text='Details'
+          rightIcon='arrow_forward'
+          url={`event/${url}`}
+        />
+      )}
     </div>
   </div>
 );
