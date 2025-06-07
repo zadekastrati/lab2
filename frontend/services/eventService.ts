@@ -17,9 +17,7 @@ export const fetchEvents = async (): Promise<Event[]> => {
   }
 
   const data = await response.json();
-  console.log('Fetched events data:', data);
 
-  // Adjust this based on backend response shape
   if (Array.isArray(data)) {
     return data;
   } else if (Array.isArray(data.events)) {
@@ -77,6 +75,7 @@ export const updateEvent = async (eventId: number, formData: FormData): Promise<
     throw new Error(error.message || 'Failed to update event');
   }
 };
+
 export const fetchEventsByCategory = async (categoryId: number): Promise<Event[]> => {
   const response = await fetch(`http://localhost:5000/api/events?categoryId=${categoryId}`);
 

@@ -22,68 +22,53 @@ const createEvent = async (req, res) => {
 
     res.status(201).json({ message: 'Event created successfully', event: newEvent });
   } catch (error) {
-    console.error('Error creating event:', error);
     res.status(500).json({ message: 'Error creating event', error: error.message });
   }
 };
 
 const getAllEvents = async (req, res) => {
   try {
-    const { search } = req.query;
-    console.log('Search query:', search); // Debug log
-
+    const { search, categoryId } = req.query;
     let whereClause = {};
 
-    if (search) {
+    if (search && categoryId) {
       whereClause = {
-        [Op.or]: [
-          { name: { [Op.like]: `%${search}%` } },
-          { location: { [Op.like]: `%${search}%` } }
+        [Op.and]: [
+          {
+            [Op.or]: [
+              { name: { [Op.iLike]: `%${search}%` } },
+              { location: { [Op.iLike]: `%${search}%` } }
+            ]
+          },
+          { categoryId: categoryId }
         ]
       };
+    } else if (search) {
+      whereClause = {
+        [Op.or]: [
+          { name: { [Op.iLike]: `%${search}%` } },
+          { location: { [Op.iLike]: `%${search}%` } }
+        ]
+      };
+    } else if (categoryId) {
+      whereClause = { categoryId: categoryId };
     }
 
-    console.log('Where clause:', JSON.stringify(whereClause, null, 2)); // Debug log
-
     const events = await Event.findAll({
-      where: whereClause
+      where: whereClause,
+      order: [['date', 'ASC']],
     });
-
-    console.log('Found events:', events.length); // Debug log
-    console.log('Events:', JSON.stringify(events, null, 2)); // Debug log
 
     res.status(200).json({ events });
   } catch (error) {
-    console.error('Error in getAllEvents:', error); // Debug log
     res.status(500).json({ message: 'Error fetching events', error: error.message });
   }
 };
 
-// Get Event by ID (include categoryId)
+// Get Event by ID
 const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    // If ID is not numeric, treat it as a search term
-    if (!/^\d+$/.test(id)) {
-      const events = await Event.findAll({
-        where: {
-          [Op.or]: [
-            { name: { [Op.like]: `%${id}%` } },
-            { location: { [Op.like]: `%${id}%` } }
-          ]
-        }
-      });
-      
-      if (!events || events.length === 0) {
-        return res.status(404).json({ message: 'Event not found' });
-      }
-      
-      // Return the first matching event
-      return res.status(200).json({ event: events[0] });
-    }
-
-    // If ID is numeric, find by primary key
     const event = await Event.findByPk(id);
 
     if (!event) {
@@ -92,28 +77,29 @@ const getEventById = async (req, res) => {
 
     res.status(200).json({ event });
   } catch (error) {
-    console.error('Error in getEventById:', error);
     res.status(500).json({ message: 'Error fetching event', error: error.message });
   }
 };
 
-// Update Event (including categoryId)
+// Update Event
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, photo, date, location, price, categoryId } = req.body;
+    const { name, date, location, price, categoryId } = req.body;
+    const photo = req.file ? req.file.filename : undefined;
 
     const event = await Event.findByPk(id);
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    event.name = name || event.name;
-    event.photo = photo || event.photo;
-    event.date = date || event.date;
-    event.location = location || event.location;
-    event.price = price || event.price;
-    event.categoryId = categoryId || event.categoryId;
+    // Update only provided fields
+    if (name) event.name = name;
+    if (photo) event.photo = photo;
+    if (date) event.date = date;
+    if (location) event.location = location;
+    if (price) event.price = price;
+    if (categoryId) event.categoryId = categoryId;
 
     await event.save();
 
@@ -127,14 +113,13 @@ const updateEvent = async (req, res) => {
 const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
-
     const event = await Event.findByPk(id);
+    
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
 
     await event.destroy();
-
     res.status(200).json({ message: 'Event deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting event', error: error.message });

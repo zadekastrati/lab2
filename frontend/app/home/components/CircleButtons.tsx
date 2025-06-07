@@ -1,27 +1,66 @@
-// components
+'use client';
+
+import { useEffect, useState } from 'react';
 import Slider from '@components/Slider/Slider';
 import ButtonCircle from '@components/Button/ButtonCircle';
+import { fetchCategories } from '@services/categoryService';
+
+interface Category {
+  id: number;
+  name: string;
+}
+
+// Map category names to Material Icons
+const categoryIcons: { [key: string]: string } = {
+  'Theater': 'theater_comedy',
+  'Concert': 'stadium',
+  'Kids': 'child_care',
+  'Sports': 'sports_football',
+  'Attractions': 'attractions',
+  'Musical': 'piano',
+  'Comedy': 'comedy_mask',
+  'Festival': 'festival',
+  // Default icon for unknown categories
+  'default': 'event'
+};
 
 const CircleButtons: React.FC = () => {
-  const categories = [
-    { icon: 'theater_comedy', text: 'Theater', categoryId: 1 },
-    { icon: 'stadium', text: 'Concert', categoryId: 2 },
-    { icon: 'child_care', text: 'Kids', categoryId: 3 },
-    { icon: 'sports_football', text: 'Sports', categoryId: 4 },
-    { icon: 'attractions', text: 'Attractions', categoryId: 5 },
-    { icon: 'piano', text: 'Musical', categoryId: 6 },
-    { icon: 'comedy_mask', text: 'Comedy', categoryId: 7 },
-    { icon: 'festival', text: 'Festival', categoryId: 8 },
-  ];
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await fetchCategories();
+        setCategories(data);
+      } catch (err) {
+        console.error('Error loading categories:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
+
+  if (loading) {
+    return (
+      <Slider>
+        <div className="loading-state">
+          <span className="material-symbols-outlined spinning">hourglass_empty</span>
+        </div>
+      </Slider>
+    );
+  }
 
   return (
     <Slider>
-      {categories.map(({ icon, text, categoryId }) => (
+      {categories.map((category) => (
         <ButtonCircle
-          key={categoryId}
-          icon={icon}
-          text={text}
-          url={`list?category=${categoryId}`}
+          key={category.id}
+          icon={categoryIcons[category.name] || categoryIcons.default}
+          text={category.name}
+          url={`events?category=${category.id}`}
         />
       ))}
     </Slider>
