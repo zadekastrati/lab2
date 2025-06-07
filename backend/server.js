@@ -38,6 +38,10 @@ const io = socketIo(server, { cors: corsOptions });
 const handleChatSocket = require("./livechat/chat.socket.js");
 handleChatSocket(io); 
 
+const setupNotificationSocket = require('./notifications/notification.socket.js');
+setupNotificationSocket(io); // vendos pas setup-it për chat nëse ke
+
+
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use("/uploads", express.static(path.join(__dirname, "uploads"))); 

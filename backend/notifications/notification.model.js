@@ -1,10 +1,13 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const NotificationSchema = new mongoose.Schema({
-  userId: { type: String, required: true },
+const notificationSchema = new mongoose.Schema({
+  userId: { type: Number, required: true },   // ID nga PostgreSQL (user)
+  eventId: { type: Number, required: true },  // ID nga PostgreSQL (event)
   message: { type: String, required: true },
-  isRead: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now },
+  isRead: { type: Boolean, default: false },  // boolean flag për leximin
 });
 
-module.exports = mongoose.model("Notification", NotificationSchema);
+const Notification = mongoose.model('Notification', notificationSchema);
+
+module.exports = Notification;

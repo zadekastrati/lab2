@@ -1,50 +1,83 @@
 const Notification = require('./notification.model.js');
-console.log('Notification model:', Notification);
+const { Event } = require('../events/event.model.js');  // Sequelize model i events (PostgreSQL)
 
-
-// Marr të gjitha njoftimet për një user
-exports.getNotifications = async (req, res) => {
+exports.getNotificationsByUser = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const userId = parseInt(req.params.userId);
+
+    // Merr njoftimet nga MongoDB (njoftime me userId)
     const notifications = await Notification.find({ userId }).sort({ createdAt: -1 });
-    res.status(200).json(notifications);
+
+    // Merr eventId-te nga njoftimet
+    const eventIds = notifications.map(n => n.eventId);
+
+    // Merr eventet nga PostgreSQL
+    const events = await Event.findAll({
+      where: { id: eventIds },
+      raw: true,
+    });
+
+    // Map njoftimet me eventin përkatës
+    const notificationsWithEvents = notifications.map(n => {
+      const event = events.find(e => e.id === n.eventId);
+      return {
+        _id: n._id,
+        userId: n.userId,
+        message: n.message,
+        isRead: n.isRead,
+        createdAt: n.createdAt,
+        event: event || null,
+      };
+    });
+
+    res.json(notificationsWithEvents);
+
   } catch (error) {
-    res.status(500).json({ message: 'Gabim gjatë marrjes së njoftimeve', error });
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Krijo njoftim të ri
 exports.createNotification = async (req, res) => {
   try {
-    const { userId, message } = req.body;
-    const newNotification = new Notification({ userId, message });
-    const savedNotification = await newNotification.save();
+    const { userId, eventId, message } = req.body;
+    if (!userId || !eventId || !message) {
+      return res.status(400).json({ message: 'userId, eventId dhe message janë të nevojshme' });
+    }
+
+    const notification = new Notification({ userId, eventId, message });
+    const savedNotification = await notification.save();
+
     res.status(201).json(savedNotification);
+
   } catch (error) {
-    res.status(500).json({ message: 'Gabim gjatë krijimit të njoftimit', error });
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Përditëso statusin e leximit të njoftimit
 exports.markAsRead = async (req, res) => {
   try {
-    const notificationId = req.params.id;
-    const updatedNotification = await Notification.findByIdAndUpdate(notificationId, { isRead: true }, { new: true });
-    if (!updatedNotification) return res.status(404).json({ message: 'Njoftimi nuk u gjet' });
-    res.status(200).json(updatedNotification);
+    const updated = await Notification.findByIdAndUpdate(req.params.id, { isRead: true }, { new: true });
+    if (!updated) return res.status(404).json({ message: 'Njoftimi nuk u gjet' });
+
+    res.json(updated);
+
   } catch (error) {
-    res.status(500).json({ message: 'Gabim gjatë përditësimit të njoftimit', error });
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
 
-// Fshi një njoftim
 exports.deleteNotification = async (req, res) => {
   try {
-    const notificationId = req.params.id;
-    const deletedNotification = await Notification.findByIdAndDelete(notificationId);
-    if (!deletedNotification) return res.status(404).json({ message: 'Njoftimi nuk u gjet për fshirje' });
-    res.status(200).json({ message: 'Njoftimi u fshi me sukses' });
+    const deleted = await Notification.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: 'Njoftimi nuk u gjet për fshirje' });
+
+    res.json({ message: 'Njoftimi u fshi me sukses' });
+
   } catch (error) {
-    res.status(500).json({ message: 'Gabim gjatë fshirjes së njoftimit', error });
+    console.error(error);
+    res.status(500).json({ message: error.message });
   }
 };
