@@ -33,7 +33,7 @@ export const fetchEvents = async (): Promise<Event[]> => {
 export async function createEvent(formData: FormData) {
   const response = await fetch('http://localhost:5000/api/events', {
     method: 'POST',
-    body: formData, // no need to set Content-Type for FormData
+    body: formData, 
   });
 
   if (!response.ok) {
@@ -77,4 +77,19 @@ export const updateEvent = async (eventId: number, formData: FormData): Promise<
     throw new Error(error.message || 'Failed to update event');
   }
 };
+export const fetchEventsByCategory = async (categoryId: number): Promise<Event[]> => {
+  const response = await fetch(`http://localhost:5000/api/events?categoryId=${categoryId}`);
+
+  if (!response.ok) {
+    let errorMsg = 'Error fetching events for category';
+    try {
+      const data = await response.json();
+      if (data.message) errorMsg = data.message;
+    } catch {}
+    throw new Error(errorMsg);
+  }
+
+  return await response.json();
+};
+
 

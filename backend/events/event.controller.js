@@ -1,4 +1,5 @@
 const Event = require('./event.model');
+const { Op } = require('sequelize');
 
 // Create Event
 const createEvent = async (req, res) => {
@@ -28,9 +29,32 @@ const createEvent = async (req, res) => {
 
 const getAllEvents = async (req, res) => {
   try {
-    const events = await Event.findAll();
+    const { search } = req.query;
+    console.log('Search query:', search); // Debug log
+
+    let whereClause = {};
+
+    if (search) {
+      whereClause = {
+        [Op.or]: [
+          { name: { [Op.like]: `%${search}%` } },
+          { location: { [Op.like]: `%${search}%` } }
+        ]
+      };
+    }
+
+    console.log('Where clause:', JSON.stringify(whereClause, null, 2)); // Debug log
+
+    const events = await Event.findAll({
+      where: whereClause
+    });
+
+    console.log('Found events:', events.length); // Debug log
+    console.log('Events:', JSON.stringify(events, null, 2)); // Debug log
+
     res.status(200).json({ events });
   } catch (error) {
+    console.error('Error in getAllEvents:', error); // Debug log
     res.status(500).json({ message: 'Error fetching events', error: error.message });
   }
 };
@@ -39,6 +63,27 @@ const getAllEvents = async (req, res) => {
 const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
+    
+    // If ID is not numeric, treat it as a search term
+    if (!/^\d+$/.test(id)) {
+      const events = await Event.findAll({
+        where: {
+          [Op.or]: [
+            { name: { [Op.like]: `%${id}%` } },
+            { location: { [Op.like]: `%${id}%` } }
+          ]
+        }
+      });
+      
+      if (!events || events.length === 0) {
+        return res.status(404).json({ message: 'Event not found' });
+      }
+      
+      // Return the first matching event
+      return res.status(200).json({ event: events[0] });
+    }
+
+    // If ID is numeric, find by primary key
     const event = await Event.findByPk(id);
 
     if (!event) {
@@ -47,6 +92,7 @@ const getEventById = async (req, res) => {
 
     res.status(200).json({ event });
   } catch (error) {
+    console.error('Error in getEventById:', error);
     res.status(500).json({ message: 'Error fetching event', error: error.message });
   }
 };

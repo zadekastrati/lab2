@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 import Link from 'next/link';
 
@@ -14,11 +15,11 @@ import ProfilePhoto from '@components/Profile/ProfilePhoto';
 
 const Header: React.FC = () => {
   const wrapperRef = useRef<any>(null);
+  const router = useRouter();
 
   const [menu, setMenu] = useState<boolean>(false);
   const [dropdown, setDropdown] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
-
 
   /**
    * This is a functional component for the Header.

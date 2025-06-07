@@ -42,6 +42,18 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/chat", chatRoutes);
 
+app.get('/api/events', async (req, res) => {
+  const category = req.query.category;
+  let query = 'SELECT * FROM events';
+  let params = [];
+  if (category) {
+    query += ' WHERE categoryId = ?';
+    params.push(category);
+  }
+  const events = await db.query(query, params);
+  res.json({ events });
+});
+
 app.get("/", (req, res) => {
   res.send("API is running...");
 });

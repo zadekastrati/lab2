@@ -45,7 +45,7 @@
     "target": "ES2017"
   },
   "include": [
-    "types",
+    "app/types",
     "src",
     "**/*.ts",
     "**/*.tsx",
