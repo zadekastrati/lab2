@@ -1,5 +1,5 @@
-const Notification = require('./notification.model.js');
-const { Event } = require('../events/event.model.js');  // Sequelize model i events (PostgreSQL)
+const Notification = require('./notification.model');
+const Event = require('../events/event.model.js'); 
 
 exports.getNotificationsByUser = async (req, res) => {
   try {
