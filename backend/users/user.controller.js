@@ -49,6 +49,20 @@ const loginUser = async (req, res) => {
       { expiresIn: '1h' }
     );
 
+    const refreshToken = jwt.sign(
+      { userId: user.id },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: '7d' }
+    );
+
+       // ✅ Set refresh token in HttpOnly cookie
+       res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true, // Use true in production (HTTPS)
+        sameSite: 'Strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+  
     res.status(200).json({ message: 'Login successful', token });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

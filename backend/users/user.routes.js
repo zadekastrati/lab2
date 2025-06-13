@@ -52,5 +52,6 @@
             });
 
             router.delete('/:id', verifyToken, allowRoles('admin'), deleteUser);
+            
 
             module.exports = router;

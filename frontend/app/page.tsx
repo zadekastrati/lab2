@@ -178,7 +178,7 @@ const Page: React.FC = () => {
 
   // Render logic
   if (loading) return <p>Loading events...</p>;
-  if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
+  // if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
 
   return (
     <Master>
