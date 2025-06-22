@@ -27,7 +27,7 @@ const Page: React.FC = () => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      timeout: 10000,
+      timeout: 30000,
     };
 
     try {

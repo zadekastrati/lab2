@@ -59,7 +59,7 @@ const getResponse = async (parameters: IRequest): Promise<IResponse> => {
     Authorization: `Basic ${createAuth}`,
   };
 
-  const timeout = parameters.timeout || 15000;
+  const timeout = parameters.timeout || 30000;
 
   const axiosConfig = {
     headers,
