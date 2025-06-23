@@ -17,9 +17,7 @@ export const fetchEvents = async (): Promise<Event[]> => {
   }
 
   const data = await response.json();
-  console.log('Fetched events data:', data);
 
-  // Adjust this based on backend response shape
   if (Array.isArray(data)) {
     return data;
   } else if (Array.isArray(data.events)) {
@@ -91,4 +89,20 @@ export const fetchEventsByCategory = async (categoryId: number): Promise<Event[]
 
   return await response.json();
 };
+
+export const fetchEventsByCategory = async (categoryId: number): Promise<Event[]> => {
+  const response = await fetch(`http://localhost:5000/api/events?categoryId=${categoryId}`);
+
+  if (!response.ok) {
+    let errorMsg = 'Error fetching events for category';
+    try {
+      const data = await response.json();
+      if (data.message) errorMsg = data.message;
+    } catch {}
+    throw new Error(errorMsg);
+  }
+
+  return await response.json();
+};
+
 

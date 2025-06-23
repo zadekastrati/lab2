@@ -150,11 +150,6 @@ const Page: React.FC = () => {
     }
   };
 
-  const cancelDelete = () => {
-    setShowDeleteModal(false);
-    setDeleteEventId(null);
-  };
-
   const handleEdit = (eventId: number) => {
     const eventToEdit = events.find((ev) => ev.id === eventId);
 
@@ -178,7 +173,6 @@ const Page: React.FC = () => {
 
   // Render logic
   if (loading) return <p>Loading events...</p>;
-  // if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
 
   return (
     <Master>
@@ -378,7 +372,7 @@ const Page: React.FC = () => {
 // Styles
 const floatingButtonStyle: React.CSSProperties = {
   position: 'absolute',
-  bottom: '25px',
+  bottom: '172px',
   right: '25px',
   width: '60px',
   height: '60px',
