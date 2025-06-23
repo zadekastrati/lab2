@@ -107,32 +107,132 @@ const Page: React.FC = () => {
             
             {/* Render the table only for admin */}
             {userRole === 'admin' && (
-              <table className="min-w-full mt-4 border-separate border-spacing-0 border border-gray-300 rounded-lg">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300 rounded-tl-lg">Name</th>
-                    <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300">Email</th>
-                    <th className="py-2 px-4 text-left text-sm font-semibold text-gray-700 border-b border-gray-300 rounded-tr-lg">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
-                      <td className="py-2 px-4 border-b border-gray-300">{user.name}</td>
-                      <td className="py-2 px-4 border-b border-gray-300">{user.email}</td>
-                      <td className="py-2 px-4 text-center border-b border-gray-300">
-                        <button
-                          className="text-red-500 hover:text-red-700 transition"
-                          onClick={() => handleDelete(user.id)}
-                          title="Delete user"
-                        >
-                          <FaTrash style={{color:'red'}} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+           <table
+           style={{
+             width: '100%',
+             maxWidth: '1120px',
+             margin: '3rem auto 0',
+             borderRadius: '1rem',
+             boxShadow: '0 25px 50px -12px rgba(128, 90, 213, 0.25)',
+             border: '1px solid #d1d5db', // Tailwind gray-300
+             overflow: 'hidden',
+             fontFamily: "'Inter', sans-serif",
+           }}
+         >
+           <thead
+             style={{
+               background: '#007bff', 
+               color: 'white',
+               position: 'sticky',
+               top: 0,
+               zIndex: 10,
+               userSelect: 'none',
+             }}
+           >
+             <tr>
+               {['Name', 'Email', 'Actions'].map((text, i) => (
+                 <th
+                   key={text}
+                   style={{
+                     padding: '1.25rem 2rem',
+                     textAlign: i === 2 ? 'center' : 'left',
+                     fontSize: '1.25rem',
+                     fontWeight: 800,
+                     letterSpacing: '0.05em',
+                   }}
+                 >
+                   {text}
+                 </th>
+               ))}
+             </tr>
+           </thead>
+           <tbody>
+             {users.map((user, idx) => (
+               <tr
+                 key={user.id}
+                 style={{
+                   cursor: 'pointer',
+                   backgroundColor: idx % 2 === 0 ? '#ffffff' : '#f9fafb', // white or gray-50
+                   transition: 'background 0.3s ease, box-shadow 0.3s ease',
+                 }}
+                 onMouseEnter={e => {
+                   (e.currentTarget as HTMLElement).style.background =
+                     'linear-gradient(90deg, #ede9fe, #fbcfe8, #fef3c7)'; // purple100->pink100->yellow100
+                   (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 15px rgba(128, 90, 213, 0.25)';
+                   (e.currentTarget as HTMLElement).style.borderRadius = '0.75rem';
+                 }}
+                 onMouseLeave={e => {
+                   (e.currentTarget as HTMLElement).style.background = idx % 2 === 0 ? '#ffffff' : '#f9fafb';
+                   (e.currentTarget as HTMLElement).style.boxShadow = 'none';
+                   (e.currentTarget as HTMLElement).style.borderRadius = '0';
+                 }}
+               >
+                 <td style={{ padding: '1.5rem 2rem', fontWeight: 600, fontSize: '1.125rem', color: '#1f2937' }}>
+                   {user.name}
+                 </td>
+                 <td style={{ padding: '1.5rem 2rem', fontSize: '1.125rem', color: '#4b5563', letterSpacing: '0.02em' }}>
+                   {user.email}
+                 </td>
+                 <td style={{ padding: '1.5rem 2rem', textAlign: 'center' }}>
+                   <button
+                     onClick={() => handleDelete(user.id)}
+                     title={`Delete ${user.name}`}
+                     aria-label={`Delete ${user.name}`}
+                     style={{
+                       display: 'inline-flex',
+                       alignItems: 'center',
+                       justifyContent: 'center',
+                       padding: '0.75rem',
+                       borderRadius: '9999px',
+                       backgroundColor: '#fee2e2', // red-100
+                       color: '#dc2626', // red-600
+                       boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                       border: 'none',
+                       cursor: 'pointer',
+                       transition: 'background-color 0.3s ease, color 0.3s ease, transform 0.3s ease',
+                     }}
+                     onMouseEnter={e => {
+                       (e.currentTarget as HTMLElement).style.backgroundColor = '#dc2626';
+                       (e.currentTarget as HTMLElement).style.color = 'white';
+                       (e.currentTarget as HTMLElement).style.transform = 'scale(1.1)';
+                       (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)';
+                     }}
+                     onMouseLeave={e => {
+                       (e.currentTarget as HTMLElement).style.backgroundColor = '#fee2e2';
+                       (e.currentTarget as HTMLElement).style.color = '#dc2626';
+                       (e.currentTarget as HTMLElement).style.transform = 'scale(1)';
+                       (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)';
+                     }}
+                   >
+                     <FaTrash size={22} />
+                   </button>
+                 </td>
+               </tr>
+             ))}
+           </tbody>
+           <tfoot>
+             <tr>
+               <td
+                 colSpan={3}
+                 style={{
+                   padding: '1rem 0',
+                   textAlign: 'center',
+                   fontSize: '0.875rem',
+                   color: '#6b7280', // gray-500
+                   fontStyle: 'italic',
+                   userSelect: 'none',
+                 }}
+               >
+                 Total Users: {users.length}
+               </td>
+             </tr>
+           </tfoot>
+         </table>
+         
+         
+          
+           
+            
             )}
           </div>
         </div>

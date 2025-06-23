@@ -1,15 +1,11 @@
-// In livechat/chat.routes.js (create this file)
 const express = require('express');
 const router = express.Router();
-const ChatMessage = require('./chat.model');
+const chatController = require('./chat.controller');
 
-router.get('/messages', async (req, res) => {
-  try {
-    const messages = await ChatMessage.find().sort({ timestamp: 1 }).limit(100); // last 100 messages, oldest first
-    res.json(messages);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to load messages' });
-  }
-});
+
+router.post('/rooms/init', chatController.initRoom);  // create or get a chat room
+router.get('/rooms', chatController.getAllRooms);     // get all chat rooms (admin)
+router.get('/messages', chatController.getMessages);  // get messages by roomId
+// router.post('/send', chatController.sendMessage); 
 
 module.exports = router;

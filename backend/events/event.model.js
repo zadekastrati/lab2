@@ -45,4 +45,3 @@ Categories.hasMany(Event, { foreignKey: 'categoryId' });
 Event.belongsTo(Categories, { foreignKey: 'categoryId' });
 
 module.exports = Event;
-  

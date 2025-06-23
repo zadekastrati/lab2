@@ -1,10 +1,6 @@
 {
   "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -23,24 +19,11 @@
       }
     ],
     "paths": {
-      "@hooks/*": [
-        "./hooks/*"
-      ],
-      "@utils/*": [
-        "./utils/*"
-      ],
-      "@contexts/*": [
-        "./contexts/*"
-      ],
-      "@providers/*": [
-        "./providers/*"
-      ],
-      "@components/*": [
-        "./components/*"
-      ],
-      "@services/*": [
-        "./services/*"
-      ]
+      "@hooks/*": ["./hooks/*"],
+      "@utils/*": ["./utils/*"],
+      "@contexts/*": ["./contexts/*"],
+      "@providers/*": ["./providers/*"],
+      "@components/*": ["./components/*"]
     },
     "target": "ES2017"
   },
@@ -53,10 +36,7 @@
     ".prettierrc.mjs",
     "eslint.config.mjs",
     ".next/types/**/*.ts",
-    "build/types/**/*.ts",
-    "app/members/signout/metadata.js"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+    "build/types/**/*.ts"
+, "app/members/signout/metadata.js"  ],
+  "exclude": ["node_modules"]
 }
