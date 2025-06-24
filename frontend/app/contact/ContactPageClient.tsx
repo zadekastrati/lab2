@@ -7,8 +7,7 @@ import Master from '@components/Layout/Master';
 import Section from '@components/Section/Section';
 import Heading from '@components/Heading/Heading';
 import ButtonLink from '@components/Button/ButtonLink';
-import ContactForm from './ContactForm'; 
-
+import ContactForm from './ContactForm'; // Rregullo path sipas vendndodhjes së ContactForm.tsx
 
 const ContactPageClient: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
@@ -60,7 +59,6 @@ const ContactPageClient: React.FC = () => {
 
             {/* Shfaq formularin këtu */}
             {showForm && <ContactForm />}
-        
           </div>
         </div>
       </Section>
