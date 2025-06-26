@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import CardGroup from '@components/Card/CardGroup';
 import EventCard from '@components/Card/EventCard';
-import { fetchEvents } from '@services/eventService';
+import { fetchEvents } from '../../../services/eventService';
 
 interface Event {
   id: number;
