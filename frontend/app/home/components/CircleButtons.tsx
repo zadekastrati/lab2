@@ -1,18 +1,70 @@
-// components
+'use client';
+
+import { useEffect, useState } from 'react';
 import Slider from '@components/Slider/Slider';
 import ButtonCircle from '@components/Button/ButtonCircle';
+import { fetchCategories } from '@services/categoryService';
 
-const CircleButtons: React.FC = () => (
-  <Slider>
-    <ButtonCircle icon='theater_comedy' text='Theater' url='list/1' />
-    <ButtonCircle icon='stadium' text='Concert' url='list' />
-    <ButtonCircle icon='child_care' text='Kids' url='list' />
-    <ButtonCircle icon='sports_football' text='Sports' url='list' />
-    <ButtonCircle icon='attractions' text='Attractions' url='list' />
-    <ButtonCircle icon='piano' text='Musical' url='list' />
-    <ButtonCircle icon='comedy_mask' text='Comedy' url='list' />
-    <ButtonCircle icon='festival' text='Festival' url='list' />
-  </Slider>
-);
+interface Category {
+  id: number;
+  name: string;
+}
+
+// Map category names to Material Icons
+const categoryIcons: { [key: string]: string } = {
+  'Theater': 'theater_comedy',
+  'Concert': 'stadium',
+  'Kids': 'child_care',
+  'Sports': 'sports_football',
+  'Attractions': 'attractions',
+  'Musical': 'piano',
+  'Comedy': 'comedy_mask',
+  'Festival': 'festival',
+  // Default icon for unknown categories
+  'default': 'event'
+};
+
+const CircleButtons: React.FC = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const data = await fetchCategories();
+        setCategories(data);
+      } catch (err) {
+        console.error('Error loading categories:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCategories();
+  }, []);
+
+  if (loading) {
+    return (
+      <Slider>
+        <div className="loading-state">
+          <span className="material-symbols-outlined spinning">hourglass_empty</span>
+        </div>
+      </Slider>
+    );
+  }
+
+  return (
+    <Slider>
+      {categories.map((category) => (
+        <ButtonCircle
+          key={category.id}
+          icon={categoryIcons[category.name] || categoryIcons.default}
+          text={category.name}
+          url={`events?category=${category.id}`}
+        />
+      ))}
+    </Slider>
+  );
+};
 
 export default CircleButtons;

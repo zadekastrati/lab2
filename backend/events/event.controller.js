@@ -1,4 +1,5 @@
 const Event = require('./event.model');
+const { Op } = require('sequelize');
 
 // Create Event
 const createEvent = async (req, res) => {
@@ -21,21 +22,50 @@ const createEvent = async (req, res) => {
 
     res.status(201).json({ message: 'Event created successfully', event: newEvent });
   } catch (error) {
-    console.error('Error creating event:', error);
     res.status(500).json({ message: 'Error creating event', error: error.message });
   }
 };
 
 const getAllEvents = async (req, res) => {
   try {
-    const events = await Event.findAll();
+    const { search, categoryId } = req.query;
+    let whereClause = {};
+
+    if (search && categoryId) {
+      whereClause = {
+        [Op.and]: [
+          {
+            [Op.or]: [
+              { name: { [Op.iLike]: `%${search}%` } },
+              { location: { [Op.iLike]: `%${search}%` } }
+            ]
+          },
+          { categoryId: categoryId }
+        ]
+      };
+    } else if (search) {
+      whereClause = {
+        [Op.or]: [
+          { name: { [Op.iLike]: `%${search}%` } },
+          { location: { [Op.iLike]: `%${search}%` } }
+        ]
+      };
+    } else if (categoryId) {
+      whereClause = { categoryId: categoryId };
+    }
+
+    const events = await Event.findAll({
+      where: whereClause,
+      order: [['date', 'ASC']],
+    });
+
     res.status(200).json({ events });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching events', error: error.message });
   }
 };
 
-// Get Event by ID (include categoryId)
+// Get Event by ID
 const getEventById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -51,23 +81,25 @@ const getEventById = async (req, res) => {
   }
 };
 
-// Update Event (including categoryId)
+// Update Event
 const updateEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, photo, date, location, price, categoryId } = req.body;
+    const { name, date, location, price, categoryId } = req.body;
+    const photo = req.file ? req.file.filename : undefined;
 
     const event = await Event.findByPk(id);
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
 
-    event.name = name || event.name;
-    event.photo = photo || event.photo;
-    event.date = date || event.date;
-    event.location = location || event.location;
-    event.price = price || event.price;
-    event.categoryId = categoryId || event.categoryId;
+    // Update only provided fields
+    if (name) event.name = name;
+    if (photo) event.photo = photo;
+    if (date) event.date = date;
+    if (location) event.location = location;
+    if (price) event.price = price;
+    if (categoryId) event.categoryId = categoryId;
 
     await event.save();
 
@@ -81,14 +113,13 @@ const updateEvent = async (req, res) => {
 const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
-
     const event = await Event.findByPk(id);
+    
     if (!event) {
       return res.status(404).json({ message: 'Event not found' });
     }
 
     await event.destroy();
-
     res.status(200).json({ message: 'Event deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting event', error: error.message });

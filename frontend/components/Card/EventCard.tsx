@@ -25,47 +25,52 @@ const EventCard: React.FC<IProps> = ({
   venue,
   image,
   color,
-  actions,  // destructure actions
-}) => (
-  <div className='card'>
-    <Link href={`/event/${url}`}>
-      <div className='card-title'>
-        <h3>{name}</h3>
+  actions,
+}) => {
+  // Create URL-friendly slug if url is not provided
+  const eventUrl = url || name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  
+  return (
+    <div className='card'>
+      <Link href={`/event/${eventUrl}`}>
+        <div className='card-title'>
+          <h3>{name}</h3>
+        </div>
+        <div
+          className='card-image'
+          style={{
+            backgroundImage: `url("${image}")`,
+          }}
+        >
+          <Badge color={color} text='NEW' />
+        </div>
+        <div className='card-info'>
+          <p>
+            <span className='material-symbols-outlined'>event</span> {when}
+          </p>
+          <p>
+            <span className='material-symbols-outlined'>apartment</span> {venue}
+          </p>
+          <p>
+            <span className='material-symbols-outlined'>local_activity</span> from{' '}
+            <strong>£{from}</strong>
+          </p>
+        </div>
+      </Link>
+      <div className='card-buttons'>
+        {actions ? (
+          actions
+        ) : (
+          <ButtonLink
+            color={`${color}-overlay`}
+            text='Details'
+            rightIcon='arrow_forward'
+            url={`/event/${eventUrl}`}
+          />
+        )}
       </div>
-      <div
-        className='card-image'
-        style={{
-          backgroundImage: `url("${image}")`,
-        }}
-      >
-        <Badge color={color} text='NEW' />
-      </div>
-      <div className='card-info'>
-        <p>
-          <span className='material-symbols-outlined'>event</span> {when}
-        </p>
-        <p>
-          <span className='material-symbols-outlined'>apartment</span> {venue}
-        </p>
-        <p>
-          <span className='material-symbols-outlined'>local_activity</span> from{' '}
-          <strong>£{from}</strong>
-        </p>
-      </div>
-    </Link>
-    <div className='card-buttons'>
-      {actions ? (
-        actions
-      ) : (
-        <ButtonLink
-          color={`${color}-overlay`}
-          text='Details'
-          rightIcon='arrow_forward'
-          url={`event/${url}`}
-        />
-      )}
     </div>
-  </div>
-);
+  );
+};
 
 export default EventCard;

@@ -17,9 +17,7 @@ export const fetchEvents = async (): Promise<Event[]> => {
   }
 
   const data = await response.json();
-  console.log('Fetched events data:', data);
 
-  // Adjust this based on backend response shape
   if (Array.isArray(data)) {
     return data;
   } else if (Array.isArray(data.events)) {

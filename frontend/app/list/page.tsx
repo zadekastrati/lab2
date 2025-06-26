@@ -18,6 +18,7 @@ interface Event {
   location: string;
   price: number;
   categoryId?: number;
+  url?: string;
 }
 
 const BASE_IMAGE_URL = 'http://localhost:5000/uploads/';
@@ -174,7 +175,6 @@ const Page: React.FC = () => {
   // Render loading / error / empty
   if (loading) return <p>Loading events...</p>;
   if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
-  if (!events.length) return <p>No upcoming events found.</p>;
 
   return (
     <Master>
@@ -188,37 +188,42 @@ const Page: React.FC = () => {
 
       <Section className="list-cards">
         <div className="container center" style={cardContainerStyle}>
-          {events.map((event) => (
-            <div key={event.id} style={{ marginBottom: '20px' }}>
-              <EventCard
-                url={event.id.toString()}
-                from={event.price.toString()}
-                color="blue"
-                when={new Date(event.date).toLocaleString()}
-                name={event.name}
-                venue={event.location}
-                image={BASE_IMAGE_URL + event.photo}
-                actions={
-                  <>
-                    <button
-                      onClick={() => handleEdit(event.id)}
-                      aria-label="Edit"
-                      style={iconButtonStyle}
-                    >
-                      {React.createElement(EditIcon)}
-                    </button>
-                    <button
-                      onClick={() => handleDeleteClick(event.id)}
-                      aria-label="Delete"
-                      style={{ ...iconButtonStyle, color: '#dc3545' }}
-                    >
-                      {React.createElement(TrashIcon)}
-                    </button>
-                  </>
-                }
-              />
-            </div>
-          ))}
+          {events.map((event) => {
+            // Create URL-friendly slug from event name or use ID for backward compatibility
+            const eventUrl = event.url || 
+              (event.id ? event.id.toString() : event.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'));
+            return (
+              <div key={event.id} style={{ marginBottom: '20px' }}>
+                <EventCard
+                  url={eventUrl}
+                  from={event.price.toString()}
+                  color="blue"
+                  when={new Date(event.date).toLocaleString()}
+                  name={event.name}
+                  venue={event.location}
+                  image={BASE_IMAGE_URL + event.photo}
+                  actions={
+                    <>
+                      <button
+                        onClick={() => handleEdit(event.id)}
+                        aria-label="Edit"
+                        style={iconButtonStyle}
+                      >
+                        {React.createElement(EditIcon)}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(event.id)}
+                        aria-label="Delete"
+                        style={{ ...iconButtonStyle, color: '#dc3545' }}
+                      >
+                        {React.createElement(TrashIcon)}
+                      </button>
+                    </>
+                  }
+                />
+              </div>
+            );
+          })}
         </div>
       </Section>
 
