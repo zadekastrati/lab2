@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Slider from '@components/Slider/Slider';
 import ButtonCircle from '@components/Button/ButtonCircle';
-import { fetchCategories } from '@services/categoryService';
+import { fetchCategories } from '../../../services/categoryService';
 
 interface Category {
   id: number;

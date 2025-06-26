@@ -6,7 +6,9 @@ const nodemailer = require('nodemailer');
 
 exports.buyTicket = async (req, res) => {
   try {
-    const userId = req.user.id;
+    console.log('req.user:', req.user); // ✅ this will show the entire user object
+    const userId = req.user.userId;
+    console.log('userId:', userId); 
     const { eventId, ticket_type = 'General' } = req.body;
 
     const event = await Event.findByPk(eventId);
@@ -27,13 +29,16 @@ exports.buyTicket = async (req, res) => {
       status: 'active',
       purchase_date: new Date(),
     });
+  
 
     // Setup email transporter (use real SMTP in production)
+    console.log('EMAIL_USER:', process.env.EMAIL_USER);
+    console.log('EMAIL_PASS:', process.env.EMAIL_PASS ? '✔️ exists' : '❌ missing');
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'process.env.EMAIL_USER',
-        pass: 'process.env.EMAIL_PASS', // or use env variable
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS, // or use env variable
       },
     });
 
@@ -59,6 +64,44 @@ exports.buyTicket = async (req, res) => {
     return res.status(500).json({ message: 'Error buying ticket' });
   }
 };
+
+exports.getAllTickets = async (req, res) => {
+  try {
+    const tickets = await Ticket.findAll({
+      include: [
+        { model: User, attributes: ['id', 'name', 'email'] },
+        { model: Event, attributes: ['id', 'name', 'date'] }
+      ]
+    });
+    res.status(200).json(tickets);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching tickets' });
+  }
+};
+
+exports.getTicketById = async (req, res) => {
+  try {
+    const { ticketId } = req.params;
+
+    const ticket = await Ticket.findByPk(ticketId, {
+      include: [
+        { model: User, attributes: ['id', 'name', 'email'] },
+        { model: Event, attributes: ['id', 'name', 'date'] }
+      ]
+    });
+
+    if (!ticket) {
+      return res.status(404).json({ message: 'Ticket not found' });
+    }
+
+    return res.status(200).json(ticket);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Error fetching ticket' });
+  }
+};
+
 exports.markTicketUsed = async (req, res) => {
   try {
     const { ticketId } = req.params;
