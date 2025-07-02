@@ -19,7 +19,7 @@ const chatRoutes = require('./livechat/chat.routes.js');
 const categoryRoutes = require('./categories/category.routes');
 const notificationRoutes = require('./notifications/notification.routes.js');
 const contactsRoutes = require('./contacts/contact.routes');
-
+const newsRoutes = require('./news/news.routes.js');
 
 
 const app = express();
@@ -56,6 +56,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/contact', contactsRoutes);
+app.use('/api/news', newsRoutes);
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

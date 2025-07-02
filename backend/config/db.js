@@ -7,6 +7,7 @@ const sequelize = new Sequelize({
     database: process.env.DB_NAME,
     host: process.env.DB_HOST || '127.0.0.1',
     dialect: process.env.DB_DIALECT || 'postgres',
+     logging: console.log,  // aktivizo logging
 });
 
 const authenticateDatabase = async () => {
